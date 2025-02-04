@@ -1,0 +1,8 @@
+{
+  "kind": "dpu_fft",
+  "size": 4,
+  "io_input": false,
+  "io_output": false,
+  "custom_properties": [],
+  "required_parameters": []
+}
