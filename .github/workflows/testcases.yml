@@ -32,6 +32,7 @@ jobs:
       env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: chmod +x vesyla-suite
+    - run: mkdir -p /home/runner/.local/bin
     - run: mv vesyla-suite /home/runner/.local/bin
     - run: echo $PATH
     - name: Assemble one example
