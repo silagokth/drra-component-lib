@@ -16,6 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: cli/gh-actions@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
@@ -26,4 +29,18 @@ jobs:
         cd build
         cmake ..
         make
-    - run: echo $(pwd)
+        echo "VESYLA_SUITE_PATH_COMPONENTS=$(pwd)/library" >> $GITHUB_ENV
+    - name: Assemble one example
+      run: |
+        cd testcases
+        for testcase in $(ls *.json); do
+          echo "Assembling $testcase"
+          ../build/vesyla_assembler $testcase
+        done
+    # download release from github.com/silagokth/vesyla-suite-4
+    - name: Download vesyla-suite-4
+      run: gh release download --repo silagokth/vesyla-suite-4 --pattern "vesyla-suite"
+    - run: ls
+    - run: echo $PATH
+
+
