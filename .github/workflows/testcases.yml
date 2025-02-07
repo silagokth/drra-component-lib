@@ -31,16 +31,17 @@ jobs:
       run: gh release download --repo silagokth/vesyla-suite-4 --pattern "vesyla-suite"
       env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: ls
-    - run: ls /
+    - run: chmod +x vesyla-suite
+    - run: mv vesyla-suite /home/runner/.local/bin
     - run: echo $PATH
     - name: Assemble one example
       run: |
         cd testcases
         for testcase in $(ls *.json); do
           echo "Assembling $testcase"
-          ../build/vesyla_assembler $testcase
+          vesyla-suite component assemble -a $testcase -o work
         done
+    - run: ls
     # download release from github.com/silagokth/vesyla-suite-4
 
 
