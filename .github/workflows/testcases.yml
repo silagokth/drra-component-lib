@@ -1,0 +1,29 @@
+name: Build testcases
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - uses: jwlawson/actions-setup-cmake@v2
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+    - run: echo $(pwd)
