@@ -9,6 +9,7 @@ package {{fingerprint}}_pkg;
 
     {% set payload_bitwidth = isa.format.instr_bitwidth - isa.format.instr_type_bitwidth - isa.format.instr_opcode_bitwidth - isa.format.instr_slot_bitwidth %}
     {% for instr in isa.instructions %}
+    {% if instr.segments is defined and instr.segments|length > 0 %}
     typedef struct packed {
         {% for segment in instr.segments %}
         {% if segment.bitwidth == 1 %}
@@ -49,9 +50,9 @@ package {{fingerprint}}_pkg;
         {% endfor %}
         return instr;
     endfunction
+    {% endif %}
     {% endfor %}
 
-    parameter SRAM_ADDR_WIDTH = 6;
     parameter DEPTH = 64;
     parameter WIDTH = 256;
 

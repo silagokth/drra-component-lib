@@ -9,6 +9,7 @@ package {{fingerprint}}_pkg;
 
     {% set payload_bitwidth = isa.format.instr_bitwidth - isa.format.instr_type_bitwidth - isa.format.instr_opcode_bitwidth - isa.format.instr_slot_bitwidth %}
     {% for instr in isa.instructions %}
+    {% if instr.segments is defined and instr.segments|length > 0 %}
     typedef struct packed {
         {% for segment in instr.segments %}
         {% if segment.bitwidth == 1 %}
@@ -49,6 +50,7 @@ package {{fingerprint}}_pkg;
         {% endfor %}
         return instr;
     endfunction
+    {% endif %}
     {% endfor %}
 
     parameter OPCODE_SWB = 3'b100;
@@ -107,26 +109,27 @@ import {{fingerprint}}_pkg::*;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            swb_configs = 0;
-            route_in_src_configs = 0;
-            route_in_dst_configs = 0;
-            route_out_src_configs = 0;
-            route_out_dst_configs = 0;
-            curr_swb_configs = 0;
-            curr_route_in_src_configs = 0;
-            curr_route_in_dst_configs = 0;
-            curr_route_out_src_configs = 0;
+            swb_configs <= 0;
+            route_in_src_configs <= 0;
+            route_in_dst_configs <= 0;
+            route_out_src_configs <= 0;
+            route_out_dst_configs <= 0;
+            curr_swb_configs <= 0;
+            curr_route_in_src_configs <= 0;
+            curr_route_in_dst_configs <= 0;
+            curr_route_out_src_configs <= 0;
+            curr_route_out_dst_configs <= 0;
         end else begin
             swb_configs = swb_configs_next;
-            route_in_src_configs = route_in_src_configs_next;
-            route_in_dst_configs = route_in_dst_configs_next;
-            route_out_src_configs = route_out_src_configs_next;
-            route_out_dst_configs = route_out_dst_configs_next;
-            curr_swb_configs = curr_swb_configs_next;
-            curr_route_in_src_configs = curr_route_in_src_configs_next;
-            curr_route_in_dst_configs = curr_route_in_dst_configs_next;
-            curr_route_out_src_configs = curr_route_out_src_configs_next;
-            curr_route_out_dst_configs = curr_route_out_dst_configs_next;
+            route_in_src_configs <= route_in_src_configs_next;
+            route_in_dst_configs <= route_in_dst_configs_next;
+            route_out_src_configs <= route_out_src_configs_next;
+            route_out_dst_configs <= route_out_dst_configs_next;
+            curr_swb_configs <= curr_swb_configs_next;
+            curr_route_in_src_configs <= curr_route_in_src_configs_next;
+            curr_route_in_dst_configs <= curr_route_in_dst_configs_next;
+            curr_route_out_src_configs <= curr_route_out_src_configs_next;
+            curr_route_out_dst_configs <= curr_route_out_dst_configs_next;
         end
     end
 
@@ -221,6 +224,7 @@ import {{fingerprint}}_pkg::*;
       end
 
       for(int i=0; i<NUM_SLOTS; i=i+1) begin
+        bulk_intercell_c_out[i] = 0;
         if(curr_route_in_dst_configs[i]) begin
           bulk_intracell_out[i] = bulk_intercell_c_in;
         end

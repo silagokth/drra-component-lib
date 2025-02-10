@@ -10,6 +10,7 @@ package {{fingerprint}}_pkg;
     // Others:
     {% set payload_bitwidth = isa.format.instr_bitwidth - isa.format.instr_type_bitwidth - isa.format.instr_opcode_bitwidth %}
     {% for instr in isa.instructions %}
+    {% if instr.segments is defined and instr.segments|length > 0 %}
     typedef struct packed {
         {% for segment in instr.segments %}
         {% if segment.bitwidth == 1 %}
@@ -50,6 +51,7 @@ package {{fingerprint}}_pkg;
         {% endfor %}
         return instr;
     endfunction
+    {% endif %}
     {% endfor %}
 
 endpackage
@@ -104,27 +106,27 @@ import {{fingerprint}}_pkg::*;
             instr_hops_out <= 0;
             instr_en_out <= 0;
             for (int i=0; i<64; i++) begin
-                iram[i] = 0;
+                iram[i] <= 0;
             end
         end else begin
             if (instr_en_in) begin
                 if (instr_hops_in == 0) begin
                     iram[instr_addr_in] = instr_data_in;
-                    instr_data_out = 0;
-                    instr_addr_out = 0;
-                    instr_hops_out = 0;
-                    instr_en_out = 0;
+                    instr_data_out <= 0;
+                    instr_addr_out <= 0;
+                    instr_hops_out <= 0;
+                    instr_en_out <= 0;
                 end else begin
-                    instr_data_out = instr_data_in;
-                    instr_addr_out = instr_addr_in;
-                    instr_hops_out = instr_hops_in - 1;
-                    instr_en_out = instr_en_in;
+                    instr_data_out <= instr_data_in;
+                    instr_addr_out <= instr_addr_in;
+                    instr_hops_out <= instr_hops_in - 1;
+                    instr_en_out <= instr_en_in;
                 end
             end else begin
-                instr_data_out = 0;
-                instr_addr_out = 0;
-                instr_hops_out = 0;
-                instr_en_out = 0;
+                instr_data_out <= 0;
+                instr_addr_out <= 0;
+                instr_hops_out <= 0;
+                instr_en_out <= 0;
             end
         end
     end
