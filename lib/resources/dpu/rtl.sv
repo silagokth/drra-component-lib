@@ -9,6 +9,7 @@ package {{fingerprint}}_pkg;
 
     {% set payload_bitwidth = isa.format.instr_bitwidth - isa.format.instr_type_bitwidth - isa.format.instr_opcode_bitwidth - isa.format.instr_slot_bitwidth %}
     {% for instr in isa.instructions %}
+    {% if instr.segments is defined and instr.segments|length > 0 %}
     typedef struct packed {
         {% for segment in instr.segments %}
         {% if segment.bitwidth == 1 %}
@@ -49,6 +50,7 @@ package {{fingerprint}}_pkg;
         {% endfor %}
         return instr;
     endfunction
+    {% endif %}
     {% endfor %}
 
   parameter FSM_MAX_STATES = 4;
@@ -195,6 +197,7 @@ import {{fingerprint}}_pkg::*;
     adder_in1 = 0;
     mult_in0 = 0;
     mult_in1 = 0;
+    acc0_next = 0;
 
     case (mode)
       DPU_MODE_ADD: begin
