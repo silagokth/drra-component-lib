@@ -111,7 +111,7 @@ import {{fingerprint}}_pkg::*;
         end else begin
             if (instr_en_in) begin
                 if (instr_hops_in == 0) begin
-                    iram[instr_addr_in] = instr_data_in;
+                    iram[instr_addr_in] <= instr_data_in;
                     instr_data_out <= 0;
                     instr_addr_out <= 0;
                     instr_hops_out <= 0;

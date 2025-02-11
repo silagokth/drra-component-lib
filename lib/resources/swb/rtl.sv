@@ -120,7 +120,7 @@ import {{fingerprint}}_pkg::*;
             curr_route_out_src_configs <= 0;
             curr_route_out_dst_configs <= 0;
         end else begin
-            swb_configs = swb_configs_next;
+            swb_configs <= swb_configs_next;
             route_in_src_configs <= route_in_src_configs_next;
             route_in_dst_configs <= route_in_dst_configs_next;
             route_out_src_configs <= route_out_src_configs_next;
@@ -145,6 +145,7 @@ import {{fingerprint}}_pkg::*;
       curr_route_in_src_configs_next = curr_route_in_src_configs;
       curr_route_in_dst_configs_next = curr_route_in_dst_configs;
       curr_route_out_src_configs_next = curr_route_out_src_configs;
+      curr_route_out_dst_configs_next = curr_route_out_dst_configs;
 
       if (activate_0[0]) begin
         curr_swb_configs_next = swb_configs[current_option];
@@ -224,7 +225,7 @@ import {{fingerprint}}_pkg::*;
       end
 
       for(int i=0; i<NUM_SLOTS; i=i+1) begin
-        bulk_intercell_c_out[i] = 0;
+        bulk_intracell_out[i] = 0;
         if(curr_route_in_dst_configs[i]) begin
           bulk_intracell_out[i] = bulk_intercell_c_in;
         end
@@ -234,3 +235,4 @@ import {{fingerprint}}_pkg::*;
 endmodule
 
 {% endif %}
+
