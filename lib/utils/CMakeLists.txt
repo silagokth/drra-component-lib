@@ -1,4 +1,4 @@
 set(CMAKE_COMPONENTS_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/library/utils)
 
-set(FILE_LIST agu.sv fsm.sv sram_model.sv)
+set(FILE_LIST agu.sv sram_model:sim.sv)
 file(COPY ${FILE_LIST} DESTINATION ${CMAKE_COMPONENTS_OUTPUT_DIRECTORY})
