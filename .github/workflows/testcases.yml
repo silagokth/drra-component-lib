@@ -1,10 +1,14 @@
 name: Build testcases
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+    secrets:
+      personal_access_token:
+        required: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -32,33 +36,22 @@ jobs:
       run: gh release download --repo silagokth/vesyla-suite-4 --pattern "vesyla-suite"
       env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: chmod +x vesyla-suite
-    - run: mkdir -p /home/runner/.local/bin
-    - run: mv vesyla-suite /home/runner/.local/bin
-    - run: echo $PATH
-    - name: Assemble one example
+    - name: Install vesyla-suite
+      run: |
+        chmod +x vesyla-suite
+        mkdir -p /home/runner/.local/bin
+        mv vesyla-suite /home/runner/.local/bin
+    - name: Assemble testcases
       run: |
         cd testcases
         for testcase in $(ls *.json); do
-          echo "Assembling $testcase"
           vesyla-suite component assemble -a $testcase -o ${testcase%.*}
         done
         ls
     - run: tar czf testcases.tar.gz testcases/
-    - name: Get current date
-      id: date
-      # run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
-      run: echo "name=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
-    - name: Release
-      uses: softprops/action-gh-release@v2
+    - name: Upload testcases
+      uses: actions/upload-artifact@v2
       with:
-        files: testcases.tar.gz
-        token: ${{ secrets.GITHUB_TOKEN }}
-        # release_name: ${{ steps.date.outputs.date }}
-        release_name: ${{ env.name }}
-        # tag_name: ${{ steps.date.outputs.date }}
-        tag_name: ${{ env.name }}
-        body: Automated release
-        draft: false
-        prerelease: false
+        name: testcases
+        path: testcases.tar.gz
 
