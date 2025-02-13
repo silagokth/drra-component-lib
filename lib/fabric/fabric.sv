@@ -44,38 +44,6 @@ import fabric_pkg::*;
     logic[ROWS:0][COLS:0][BULK_WIDTH-1:0] bulk_intercell_s2n_net;
     logic[ROWS:0][COLS:0][BULK_WIDTH-1:0] bulk_intercell_e2w_net;
 
-    // always_comb begin
-    //     if (~rst_n) begin
-    //         // for (int r=0; r<ROWS; r++) begin
-    //         //     // call_net[r][0] = 0;
-    //         //     // ret_net[r][COLS] = 1;
-    //         //     // instr_data_net[r][0] = 0;
-    //         //     // instr_addr_net[r][0] = 0;
-    //         //     // instr_hops_net[r][0] = 0;
-    //         //     // instr_en_net[r][0] = 0;
-    //         //     instr_data_out[r] = 0;
-    //         //     instr_addr_out[r] = 0;
-    //         //     instr_hops_out[r] = 0;
-    //         //     instr_en_out[r] = 0;
-    //         // end
-    //     end
-    //     else begin
-    //     for (int i=0; i<ROWS; i++) begin
-    //         call_net[i][0] = call[i];
-    //         // ret[i] = ret_net[i][0];
-    //         ret_net[i][COLS] = 1;
-    //         instr_data_net[i][0] = instr_data_in[i];
-    //         instr_addr_net[i][0] = instr_addr_in[i];
-    //         instr_hops_net[i][0] = instr_hops_in[i];
-    //         instr_en_net[i][0] = instr_en_in[i];
-    //         instr_data_out[i] = instr_data_net[i][COLS];
-    //         instr_addr_out[i] = instr_addr_net[i][COLS];
-    //         instr_hops_out[i] = instr_hops_net[i][COLS];
-    //         instr_en_out[i] = instr_en_net[i][COLS];
-    //     end
-    //     end
-    // end
-
     for(genvar i=0; i<ROWS; i++) begin
         assign ret[i] = ret_net[i][0];
         assign ret_net[i][COLS] = 1;

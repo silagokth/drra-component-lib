@@ -41,9 +41,6 @@ import fabric_pkg::*;
         for (int i=0; i<ROWS; i++) begin
             call[i] = 0;
         end
-        for (int i=0; i<COLS; i++) begin
-            io_data_in[i] = 0;
-        end
 
         @(negedge clk) rst_n = 1;
 
@@ -156,14 +153,26 @@ import fabric_pkg::*;
         end
     end
 
-    // memory
-    always @(posedge clk) begin
-        for (int i=0; i<COLS; i++) begin
-            if (io_en_out[i]) begin
-                output_buffer[io_addr_out[i]] = io_data_out[i];
+    // Write to IO
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n) begin
+            output_buffer.delete();
+        end else begin
+            for (int i=0; i<COLS; i++) begin
+                if (io_en_out[i]) begin
+                    output_buffer[io_addr_out[i]] = io_data_out[i];
+                end
             end
+        end
+    end
+
+    // Read from IO
+    always_comb begin
+        for (int i=0; i<COLS; i++) begin
             if (io_en_in[i]) begin
                 io_data_in[i] = input_buffer[io_addr_in[i]];
+            end else begin
+                io_data_in[i] = 0;
             end
         end
     end

@@ -396,29 +396,9 @@ import {{fingerprint}}_pkg::*;
             sram_out_addr = 0;
         end
     end
-
-    logic port_enable_1_3_delay;
-    logic port_enable_0_3_delay;
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            port_enable_1_3_delay <= 0;
-        end
-        else begin
-            port_enable_1_3_delay <= port_enable_1_3;
-        end
-    end
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            port_enable_0_3_delay <= 0;
-        end
-        else begin
-            port_enable_0_3_delay <= port_enable_0_3;
-        end
-    end
     
     always_comb begin
-        if (port_enable_1_3_delay) begin
+        if (port_enable_1_3) begin
             bulk_data_out_1 = sram_out_data;
         end
         else begin
@@ -426,7 +406,7 @@ import {{fingerprint}}_pkg::*;
         end
     end
     always_comb begin
-        if (port_enable_0_3_delay) begin
+        if (port_enable_0_3) begin
             io_data_out = sram_out_data;
         end
         else begin

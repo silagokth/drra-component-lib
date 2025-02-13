@@ -32,10 +32,12 @@ module sram_model #(
       end else begin
         memory[AA] <= memory[AA];
       end
+  end
+  always_comb begin
       if (!CEBB) begin
-        QB <= memory[AB];
+        QB = memory[AB];
       end else begin
-        QB <= 0;
+        QB = 0;
       end
   end
 endmodule
