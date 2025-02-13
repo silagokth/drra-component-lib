@@ -1,10 +1,14 @@
 name: Build testcases
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+    secrets:
+      personal_access_token:
+        required: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -32,15 +36,15 @@ jobs:
       run: gh release download --repo silagokth/vesyla-suite-4 --pattern "vesyla-suite"
       env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: chmod +x vesyla-suite
-    - run: mkdir -p /home/runner/.local/bin
-    - run: mv vesyla-suite /home/runner/.local/bin
-    - run: echo $PATH
-    - name: Assemble one example
+    - name: Install vesyla-suite
+      run: |
+        chmod +x vesyla-suite
+        mkdir -p /home/runner/.local/bin
+        mv vesyla-suite /home/runner/.local/bin
+    - name: Assemble testcases
       run: |
         cd testcases
         for testcase in $(ls *.json); do
-          echo "Assembling $testcase"
           vesyla-suite component assemble -a $testcase -o ${testcase%.*}
         done
         ls
