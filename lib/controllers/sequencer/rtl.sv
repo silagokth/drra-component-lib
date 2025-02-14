@@ -55,7 +55,6 @@ package {{fingerprint}}_pkg;
     {% endfor %}
 
 endpackage
-
 module {{fingerprint}}
 import {{fingerprint}}_pkg::*;
 (
@@ -63,18 +62,35 @@ import {{fingerprint}}_pkg::*;
     input  logic rst_n,
     input  logic call,
     output logic ret,
-    output logic [NUM_SLOTS-1:0] instr_en,
-    output logic [RESOURCE_INSTR_WIDTH-1:0] instr,
-    output logic [NUM_SLOTS-1:0][FSM_PER_SLOT-1:0] activate,
-    input  logic [INSTR_DATA_WIDTH-1:0] instr_data_in,
-    input  logic [INSTR_ADDR_WIDTH-1:0] instr_addr_in,
-    input  logic [INSTR_HOPS_WIDTH-1:0] instr_hops_in,
-    input  logic instr_en_in,
-    output logic [INSTR_DATA_WIDTH-1:0] instr_data_out,
-    output logic [INSTR_ADDR_WIDTH-1:0] instr_addr_out,
-    output logic [INSTR_HOPS_WIDTH-1:0] instr_hops_out,
-    output logic instr_en_out
+    {% for i in range(size) %}
+    output logic instr_valid_{{i}},
+    output logic [RESOURCE_INSTR_WIDTH-1:0] instr_{{i}},
+    output logic [FSM_PER_SLOT-1:0] activate_{{i}},
+    output logic clk_{{i}},
+    output logic rst_n_{{i}},
+    {% endfor %}
+    input  logic [INSTR_DATA_WIDTH-1:0] instr_load_data_in,
+    input  logic [INSTR_ADDR_WIDTH-1:0] instr_load_addr_in,
+    input  logic [INSTR_HOPS_WIDTH-1:0] instr_load_hops_in,
+    input  logic instr_load_en_in,
+    output logic [INSTR_DATA_WIDTH-1:0] instr_load_data_out,
+    output logic [INSTR_ADDR_WIDTH-1:0] instr_load_addr_out,
+    output logic [INSTR_HOPS_WIDTH-1:0] instr_load_hops_out,
+    output logic instr_load_en_out
 );
+
+    // Propagate signals to resources:
+    logic [NUM_SLOTS-1:0] resource_instr;
+    logic [RESOURCE_INSTR_WIDTH-1:0] instr;
+    logic [NUM_SLOTS-1:0] resource_instr_valid;
+    logic [NUM_SLOTS-1:0][FSM_PER_SLOT-1:0] resource_activate;
+    {% for i in range(size) %}
+    assign clk_{{i}} = clk;
+    assign rst_n_{{i}} = rst_n;
+    assign instr_valid_{{i}} = resource_instr_valid[{{i}}];
+    assign activate_{{i}} = resource_activate[{{i}}];
+    assign instr_{{i}} = instr;
+    {% endfor %}
 
     // Parameter check:
 
@@ -101,32 +117,32 @@ import {{fingerprint}}_pkg::*;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
-            instr_data_out <= 0;
-            instr_addr_out <= 0;
-            instr_hops_out <= 0;
-            instr_en_out <= 0;
+            instr_load_data_out <= 0;
+            instr_load_addr_out <= 0;
+            instr_load_hops_out <= 0;
+            instr_load_en_out <= 0;
             for (int i=0; i<64; i++) begin
                 iram[i] <= 0;
             end
         end else begin
-            if (instr_en_in) begin
-                if (instr_hops_in == 0) begin
-                    iram[instr_addr_in] <= instr_data_in;
-                    instr_data_out <= 0;
-                    instr_addr_out <= 0;
-                    instr_hops_out <= 0;
-                    instr_en_out <= 0;
+            if (instr_load_en_in) begin
+                if (instr_load_hops_in == 0) begin
+                    iram[instr_load_addr_in] <= instr_load_data_in;
+                    instr_load_data_out <= 0;
+                    instr_load_addr_out <= 0;
+                    instr_load_hops_out <= 0;
+                    instr_load_en_out <= 0;
                 end else begin
-                    instr_data_out <= instr_data_in;
-                    instr_addr_out <= instr_addr_in;
-                    instr_hops_out <= instr_hops_in - 1;
-                    instr_en_out <= instr_en_in;
+                    instr_load_data_out <= instr_load_data_in;
+                    instr_load_addr_out <= instr_load_addr_in;
+                    instr_load_hops_out <= instr_load_hops_in - 1;
+                    instr_load_en_out <= instr_load_en_in;
                 end
             end else begin
-                instr_data_out <= 0;
-                instr_addr_out <= 0;
-                instr_hops_out <= 0;
-                instr_en_out <= 0;
+                instr_load_data_out <= 0;
+                instr_load_addr_out <= 0;
+                instr_load_hops_out <= 0;
+                instr_load_en_out <= 0;
             end
         end
     end
@@ -192,8 +208,8 @@ import {{fingerprint}}_pkg::*;
     always_comb begin
         ret = 0;
         for (int i = 0; i < NUM_SLOTS; i = i + 1) begin
-            instr_en[i] = 0;
-            activate[i] = 0;
+            resource_instr_valid[i] = 0;
+            resource_activate[i] = 0;
         end
         instr = 0;
         case (state)
@@ -204,14 +220,14 @@ import {{fingerprint}}_pkg::*;
                         _act = unpack_act(instr_reg);
                         activate_flat = _act._ports << (_act._param * FSM_PER_SLOT);
                         for (int i=0; i<NUM_SLOTS; i++) begin
-                            activate[i] = activate_flat[FSM_PER_SLOT*i +: FSM_PER_SLOT];
+                            resource_activate[i] = activate_flat[FSM_PER_SLOT*i +: FSM_PER_SLOT];
                         end
                     end else if (opcode == 0) begin
                         ret = 1;
                     end
                 end else begin
                     instr = {opcode, payload};
-                    instr_en[slot] = 1;
+                    resource_instr_valid[slot] = 1;
                 end
             end
         endcase

@@ -46,6 +46,9 @@ import {{fingerprint}}_pkg::*;
     output logic [BULK_BITWIDTH-1:0] bulk_intercell_s_out
 );
 
+  logic [NUM_SLOTS-1:0] resource_clk;
+  logic [NUM_SLOTS-1:0] resource_rst_n;
+  logic [NUM_SLOTS-1:0] instr_valid;
   logic [NUM_SLOTS-1:0] instr_en;
   logic [RESOURCE_INSTR_WIDTH-1:0] instr;
   logic [NUM_SLOTS-1:0][FSM_PER_SLOT-1:0] activate;
@@ -82,17 +85,21 @@ import {{fingerprint}}_pkg::*;
         .rst_n(rst_n),
         .call(controller_call),
         .ret(controller_ret),
-        .instr_en(instr_en),
-        .instr(instr),
-        .activate(activate),
-        .instr_data_in(instr_data_in),
-        .instr_addr_in(instr_addr_in),
-        .instr_hops_in(instr_hops_in),
-        .instr_en_in(instr_en_in),
-        .instr_data_out(instr_data_out),
-        .instr_addr_out(instr_addr_out),
-        .instr_hops_out(instr_hops_out),
-        .instr_en_out(instr_en_out)
+        {% for i in range(16) %}
+        .instr_valid_{{i}}(instr_valid[{{i}}]),
+        .instr_{{i}}(instr[{{i}}]),
+        .activate_{{i}}(activate[{{i}}]),
+        .clk_{{i}}(resource_clk[{{i}}]),
+        .rst_n_{{i}}(resource_rst_n[{{i}}]),
+        {% endfor %}
+        .instr_load_data_in(instr_data_in),
+        .instr_load_addr_in(instr_addr_in),
+        .instr_load_hops_in(instr_hops_in),
+        .instr_load_en_in(instr_en_in),
+        .instr_load_data_out(instr_data_out),
+        .instr_load_addr_out(instr_addr_out),
+        .instr_load_hops_out(instr_hops_out),
+        .instr_load_en_out(instr_en_out)
     );
 
     {% for res in resources_list %}
@@ -100,10 +107,10 @@ import {{fingerprint}}_pkg::*;
     `{{res.name}} resource_{{res.slot}}_inst
     (
       {% for i in range(res.size) %}
-        .clk_{{i}}(clk),
-        .rst_n_{{i}}(rst_n),
-        .instr_en_{{i}}(instr_en[{{ res.slot+i }}]),
-        .instr_{{i}}(instr),
+        .clk_{{i}}(resource_clk[{{res.slot + i}}]),
+        .rst_n_{{i}}(resource_rst_n[{{res.slot + i}}]),
+        .instr_en_{{i}}(instr_valid[{{res.slot + i}}]),
+        .instr_{{i}}(instr[{{res.slot + i}}]),
         .activate_{{i}}(activate[{{ res.slot+i }}]),
       {% endfor %}
         .word_channels_in(word_data_out),
@@ -125,10 +132,10 @@ import {{fingerprint}}_pkg::*;
     `{{res.name}} resource_{{res.slot}}_inst
     (
         {% for i in range(res.size) %}
-        .clk_{{i}}(clk),
-        .rst_n_{{i}}(rst_n),
-        .instr_en_{{i}}(instr_en[{{ res.slot+i }}]),
-        .instr_{{i}}(instr),
+        .clk_{{i}}(resource_clk[{{res.slot + i}}]),
+        .rst_n_{{i}}(resource_rst_n[{{res.slot + i}}]),
+        .instr_en_{{i}}(instr_valid[{{res.slot+i}}]),
+        .instr_{{i}}(instr[{{res.slot+i}}]),
         .activate_{{i}}(activate[{{ res.slot+i }}]),
         .word_data_in_{{i}}(word_data_in[{{res.slot+i}}]),
         .word_data_out_{{i}}(word_data_out[{{res.slot+i}}]),
